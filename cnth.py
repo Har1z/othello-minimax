@@ -110,6 +110,31 @@ def state_to_string(state): # aku ubah ya bwang ui nya -robby
     string_board.append("  +---------------+")
     return "\n".join(string_board)
 
+# user helper
+def state_to_string_with_moves(state, moves): # maya nyobain dulu
+    board = np.copy(state["board"])
+
+    for m in moves:
+        _, x, y = m
+        if board[y, x] == EMPTY:
+            board[y, x] = -1
+
+    string_board = []
+    string_board.append("   A B C D E F G H")
+    string_board.append("  +---------------+")
+
+    for i, row in enumerate(board):
+        cells = []
+        for cell in row:
+            if cell == -1:
+                cells.append("*")
+            else:
+                cells.append(PLAYER_NAMES[cell])
+        string_board.append(f"{i} |{' '.join(cells)}|")
+
+    string_board.append("  +---------------+")
+    return "\n".join(string_board)
+
 def coordinate_translator(x, y): # cuz why not? -haris
     # Fixed logic to match standard Othello board (A-H, 0-7) -robby
     x_translate = ["A", "B", "C", "D", "E", "F", "G", "H"]
@@ -341,7 +366,10 @@ def winner(state):
 # untuk player atau user
 def human_player(state):
     moves = generate_moves(state)
-    if not moves: return None
+    if not moves:
+        return None
+    print("\nLangkah Valid (* = posisi yang bisa dipilih):")
+    print(state_to_string_with_moves(state, moves)) # maya nyobain
 
     # hard to read, translate to chess coordinate later -haris
     # Translated using coordinate_translator -robby
