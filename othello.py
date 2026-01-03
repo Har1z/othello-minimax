@@ -157,11 +157,43 @@ def apply_move_cloning(state, move):
     apply_move(new_state, move)
     return new_state
 
+#Fuzzy Logic maybe? -ipan
+def mobility(state, player):
+    return len(generate_moves(state, player))
+
+
+def corner_control(state, player):
+    board = state["board"]
+    size = state["boardSize"]
+    corners = [(0,0), (0,size-1), (size-1,0), (size-1,size-1)]
+    return sum(1 for x, y in corners if board[y][x] == player)
+
+
+def fuzzify(value, min_val, max_val):
+    if value <= min_val:
+        return 0.0
+    if value >= max_val:
+        return 1.0
+    return (value - min_val) / (max_val - min_val)
+
+
+def fuzzy_evaluation(state):
+    material = score(state)
+    mob = mobility(state, PLAYER1) - mobility(state, PLAYER2)
+    corner = corner_control(state, PLAYER1) - corner_control(state, PLAYER2)
+
+    material_f = fuzzify(material, -20, 20)
+    mobility_f = fuzzify(mob, -10, 10)
+    corner_f = fuzzify(corner, -4, 4)
+
+    return (material_f * 0.4 + mobility_f * 0.3 + corner_f * 0.3) * 100
+
+
 def negamax(state, depth): # idk i just trying things i found in the internet, but this kinda fire..
     moves = generate_moves(state)
 
     if depth == 0 or not moves:
-        return score(state), None
+        return fuzzy_evaluation(state), None # changed to fuzzy evaluation hehe -ipan
     
     best_score = -9999
     best_move = None
